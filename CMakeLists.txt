@@ -83,20 +83,22 @@ install(TARGETS appmplayer
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-enable_testing()
-add_subdirectory(tests)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+    enable_testing()
+    add_subdirectory(tests)
 
-add_custom_target(run_tests ALL
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
-add_dependencies(run_tests appmplayer
-    tst_audioengine
-    tst_playlistmanager
-    tst_filebrowser
-    tst_database
-    tst_qml_controls
-    tst_qml_playlist
-    tst_qml_delegate
-    tst_integration
-)
+    add_custom_target(run_tests ALL
+        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    add_dependencies(run_tests appmplayer
+        tst_audioengine
+        tst_playlistmanager
+        tst_filebrowser
+        tst_database
+        tst_qml_controls
+        tst_qml_playlist
+        tst_qml_delegate
+        tst_integration
+    )
+endif()
