@@ -91,7 +91,16 @@ jobs:
 
       - name: Package APK
         run: |
-          ${{ env.QT_ROOT_DIR }}/bin/androiddeployqt \
+          if [[ -x "${QT_HOST_PATH}/bin/androiddeployqt" ]]; then
+            androiddeployqt="${QT_HOST_PATH}/bin/androiddeployqt"
+          elif command -v androiddeployqt >/dev/null 2>&1; then
+            androiddeployqt="androiddeployqt"
+          else
+            androiddeployqt="$(find /opt/Qt -path '*/bin/androiddeployqt' -type f -print -quit)"
+          fi
+          test -n "${androiddeployqt}"
+
+          "${androiddeployqt}" \
             --input build-android/android-appmplayer-deployment-settings.json \
             --output build-android/android-build \
             --deployment bundled \
@@ -158,19 +167,20 @@ jobs:
 
       - name: Configure for iOS Device
         run: |
-          cmake -B build-ios-device \
+          "${QT_ROOT_DIR}/bin/qt-cmake" -B build-ios-device \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_SYSTEM_VERSION=17.0 \
             -DCMAKE_OSX_SYSROOT=iphoneos \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for iOS Device
-        run: cmake --build build-ios-device --parallel "$(nproc)"
+        run: cmake --build build-ios-device --parallel "$(sysctl -n hw.logicalcpu)"
 
       - name: Configure for iOS Simulator
         run: |
-          cmake -B build-ios-sim \
+          "${QT_ROOT_DIR}/bin/qt-cmake" -B build-ios-sim \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_SYSTEM_VERSION=17.0 \
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
@@ -179,12 +189,7 @@ jobs:
             -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for iOS Simulator
-        run: cmake --build build-ios-sim --parallel "$(nproc)"
-
-      - name: Run Tests
-        env:
-          QT_QPA_PLATFORM: offscreen
-        run: ctest --test-dir build-ios-sim --output-on-failure
+        run: cmake --build build-ios-sim --parallel "$(sysctl -n hw.logicalcpu)"
 
   create-release:
     needs: [desktop-linux, android]

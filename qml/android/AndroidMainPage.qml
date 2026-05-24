@@ -8,6 +8,8 @@ import mplayer
 Page {
     id: root
 
+    Material.theme: Material.Dark
+
     property bool isPlayerExpanded: false
 
     background: Rectangle {

@@ -7,15 +7,63 @@ import QtCore
 ApplicationWindow {
     id: root
 
+    readonly property color appBackgroundColor: "#121212"
+    readonly property color chromeBackgroundColor: "#1a1a1a"
+    readonly property color accentColor: "#1DB954"
+
     title: qsTr("Music Player")
     visible: true
-    color: "#121212"
+    color: appBackgroundColor
+
+    palette.window: appBackgroundColor
+    palette.windowText: readableTextColor(appBackgroundColor)
+    palette.button: chromeBackgroundColor
+    palette.buttonText: readableTextColor(chromeBackgroundColor)
+    palette.text: readableTextColor(appBackgroundColor)
 
     minimumWidth: 800
     minimumHeight: 500
 
+    function relativeLuminance(color) {
+        return 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
+    }
+
+    function readableTextColor(backgroundColor) {
+        return relativeLuminance(backgroundColor) > 0.55
+               ? Qt.rgba(0.13, 0.13, 0.14, 1.0)
+               : Qt.rgba(0.96, 0.96, 0.96, 1.0)
+    }
+
+    function overlayColor(baseColor, alpha) {
+        var foreground = readableTextColor(baseColor)
+        return Qt.rgba(foreground.r, foreground.g, foreground.b, alpha)
+    }
+
     function openFolder() {
         folderDialog.open()
+    }
+
+    component AdaptiveToolButton: ToolButton {
+        id: control
+
+        property color surfaceColor: root.chromeBackgroundColor
+        readonly property color foregroundColor: root.readableTextColor(surfaceColor)
+
+        palette.button: surfaceColor
+        palette.buttonText: foregroundColor
+        palette.text: foregroundColor
+        palette.windowText: foregroundColor
+        icon.color: foregroundColor
+        opacity: enabled ? 1.0 : 0.45
+
+        background: Rectangle {
+            radius: 4
+            color: control.down
+                   ? root.overlayColor(control.surfaceColor, 0.18)
+                   : control.hovered
+                     ? root.overlayColor(control.surfaceColor, 0.10)
+                     : "transparent"
+        }
     }
 
     FolderDialog {
@@ -98,7 +146,7 @@ ApplicationWindow {
             height: 48
 
             background: Rectangle {
-                color: "#1a1a1a"
+                color: root.chromeBackgroundColor
             }
 
             RowLayout {
@@ -113,11 +161,11 @@ ApplicationWindow {
                     onTriggered: root.openFolder()
                 }
 
-                ToolButton { action: openAction }
+                AdaptiveToolButton { action: openAction }
 
                 Item { Layout.fillWidth: true }
 
-                ToolButton {
+                AdaptiveToolButton {
                     text: "\u23EE"
                     font.pixelSize: 18
                     onClicked: appController.previousTrack()
@@ -125,7 +173,7 @@ ApplicationWindow {
                     ToolTip.text: qsTr("Previous")
                 }
 
-                ToolButton {
+                AdaptiveToolButton {
                     id: playPauseBtn
                     text: appController.audioEngine.playbackState === 1 ? "\u23F8" : "\u25B6"
                     font.pixelSize: 22
@@ -136,7 +184,7 @@ ApplicationWindow {
                     ToolTip.text: appController.audioEngine.playbackState === 1 ? qsTr("Pause") : qsTr("Play")
                 }
 
-                ToolButton {
+                AdaptiveToolButton {
                     text: "\u23ED"
                     font.pixelSize: 18
                     onClicked: appController.nextTrack()
@@ -192,7 +240,7 @@ ApplicationWindow {
             Rectangle {
                 SplitView.minimumWidth: 300
                 SplitView.preferredWidth: parent.width * 0.45
-                color: "#1a1a1a"
+                color: root.chromeBackgroundColor
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -251,14 +299,16 @@ ApplicationWindow {
                         spacing: 16
                         Layout.alignment: Qt.AlignHCenter
 
-                        ToolButton {
+                        AdaptiveToolButton {
+                            surfaceColor: root.chromeBackgroundColor
                             text: "\u23EE"
                             font.pixelSize: 24
                             onClicked: appController.previousTrack()
                         }
 
-                        ToolButton {
+                        AdaptiveToolButton {
                             id: playBtn
+                            surfaceColor: root.accentColor
                             text: appController.audioEngine.playbackState === 1 ? "\u23F8" : "\u25B6"
                             font.pixelSize: 32
                             implicitWidth: 56
@@ -267,7 +317,7 @@ ApplicationWindow {
 
                             background: Rectangle {
                                 radius: 28
-                                color: "#1DB954"
+                                color: root.accentColor
                             }
 
                             contentItem: Text {
@@ -279,7 +329,8 @@ ApplicationWindow {
                             }
                         }
 
-                        ToolButton {
+                        AdaptiveToolButton {
+                            surfaceColor: root.chromeBackgroundColor
                             text: "\u23ED"
                             font.pixelSize: 24
                             onClicked: appController.nextTrack()
@@ -294,7 +345,7 @@ ApplicationWindow {
         Rectangle {
             Layout.fillWidth: true
             height: 4
-            color: "#1DB954"
+            color: root.accentColor
             visible: appController.audioEngine.playbackState === 1
         }
     }

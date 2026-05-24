@@ -32,7 +32,7 @@ Popup {
         Text {
             text: root.errorMessage
             wrapMode: Text.WordWrap
-            color: "#333"
+            color: "#fff"
             Layout.fillWidth: true
         }
 
