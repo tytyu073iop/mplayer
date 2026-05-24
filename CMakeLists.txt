@@ -72,6 +72,13 @@ target_link_libraries(appmplayer
         Qt6::Sql
 )
 
+if(IOS)
+    qt_import_plugins(appmplayer
+        EXCLUDE
+            Qt6::QFFmpegMediaPlugin
+    )
+endif()
+
 set_target_properties(appmplayer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appmplayer
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
