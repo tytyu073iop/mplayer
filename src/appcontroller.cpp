@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QTranslator>
 #include <QDebug>
+#include <QUrl>
 
 AppController::AppController(QQmlApplicationEngine *engine, QObject *parent)
     : QObject(parent)
@@ -53,8 +54,13 @@ QString AppController::platform() const { return m_platform; }
 
 void AppController::openFolder(const QString &path)
 {
+    QString localPath = path;
+    const QUrl url(path);
+    if (url.isLocalFile())
+        localPath = url.toLocalFile();
+
     m_playlist->clear();
-    m_fileBrowser->scanDirectory(path);
+    m_fileBrowser->scanDirectory(localPath);
 }
 
 void AppController::playTrack(int index)

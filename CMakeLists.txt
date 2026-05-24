@@ -78,6 +78,12 @@ set_target_properties(appmplayer PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+if(ANDROID)
+    set_target_properties(appmplayer PROPERTIES
+        QT_ANDROID_MIN_SDK_VERSION 24
+        QT_ANDROID_TARGET_SDK_VERSION 35
+    )
+endif()
 
 install(TARGETS appmplayer
     BUNDLE DESTINATION .
