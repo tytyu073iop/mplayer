@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Controls.Fusion
 import QtQuick.Dialogs
 import QtCore
 
@@ -11,8 +10,6 @@ ApplicationWindow {
     title: qsTr("Music Player")
     visible: true
     color: "#121212"
-
-    Fusion.theme: Fusion.Dark
 
     minimumWidth: 800
     minimumHeight: 500

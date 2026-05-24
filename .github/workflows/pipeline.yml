@@ -43,7 +43,7 @@ jobs:
       QT_VERSION: 6.11.1
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      ANDROID_NDK_ROOT: ${{ github.workspace }}/android-sdk/ndk/27.2.12479018
+      ANDROID_NDK_ROOT: ${{ github.workspace }}/android-sdk/ndk/28.2.13676358
       ANDROID_API_LEVEL: 36
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
       - name: Install Android SDK & NDK
         uses: android-actions/setup-android@v3
         with:
-          packages: tools platform-tools platforms;android-36 build-tools;36.0.0 ndk;27.2.12479018
+          packages: tools platform-tools platforms;android-36 build-tools;36.0.0 ndk;28.2.13676358
 
       - name: Verify Android SDK
         run: |
