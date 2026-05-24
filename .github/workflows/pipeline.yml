@@ -22,7 +22,7 @@ jobs:
           target: desktop
           arch: linux_gcc_64
           dir: /opt/Qt
-          modules: qtmultimedia qtdeclarative
+          modules: qtmultimedia
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
@@ -100,7 +100,7 @@ jobs:
           host: linux
           arch: wasm_singlethread
           dir: /opt/Qt
-          modules: qtmultimedia qtdeclarative
+          modules: qtmultimedia
 
       - name: Configure for Wasm
         run: |
@@ -130,7 +130,7 @@ jobs:
           version: 6.11.1
           host: mac
           target: ios
-          modules: qtmultimedia qtdeclarative
+          modules: qtmultimedia
 
       - name: Configure for iOS Device
         run: |
