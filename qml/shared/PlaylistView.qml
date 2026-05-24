@@ -16,6 +16,7 @@ ListView {
     currentIndex: currentTrackIndex
 
     delegate: TrackDelegate {
+        required property int index
         required property var model
 
         actualIndex: index
@@ -30,8 +31,8 @@ ListView {
         width: root.width
 
         onClicked: {
-            root.currentIndex = index
-            root.trackSelected(index)
+            root.currentIndex = actualIndex
+            root.trackSelected(actualIndex)
         }
     }
 
