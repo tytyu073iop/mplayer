@@ -41,10 +41,18 @@ jobs:
     name: Android (arm64-v8a)
     env:
       QT_VERSION: 6.11.1
-      ANDROID_SDK_ROOT: /opt/android-sdk
-      ANDROID_NDK_ROOT: /opt/android-sdk/ndk/27.2.12479018
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      ANDROID_NDK_ROOT: ${{ github.workspace }}/android-sdk/ndk/27.2.12479018
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Android SDK & NDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: tools platform-tools platforms;android-24 ndk;27.2.12479018
+
+      - name: Verify NDK
+        run: test -f "${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake"
 
       - name: Install Qt for Android
         uses: jurplel/install-qt-action@v4
@@ -55,22 +63,24 @@ jobs:
           target: android
           dir: /opt/Qt
           modules: qtmultimedia
+          install-deps: true
 
-      - name: Install Android SDK & NDK
-        uses: android-actions/setup-android@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          sdk-path: ${{ env.ANDROID_SDK_ROOT }}
-          ndk-version: 27.2.12479018
+          distribution: temurin
+          java-version: "17"
 
       - name: Configure for Android
         run: |
           cmake -B build-android \
-            -DCMAKE_TOOLCHAIN_FILE="${{ env.ANDROID_NDK_ROOT }}/build/cmake/android.toolchain.cmake" \
+            -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-24 \
-            -DCMAKE_FIND_ROOT_PATH="${{ env.QT_ROOT_DIR }}" \
-            -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT_DIR }}" \
-            -DQT_HOST_PATH="/opt/Qt/${{ env.QT_VERSION }}/gcc_64"
+            -DCMAKE_FIND_ROOT_PATH="${QT_ROOT_DIR}" \
+            -DCMAKE_PREFIX_PATH="${QT_ROOT_DIR}" \
+            -DQT_HOST_PATH="${QT_HOST_PATH}" \
+            -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for Android
         run: cmake --build build-android --parallel "$(nproc)"
