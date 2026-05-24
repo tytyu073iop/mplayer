@@ -1,0 +1,152 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  desktop-linux:
+    runs-on: ubuntu-24.04
+    name: Desktop Linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qt6-base-dev qt6-multimedia-dev \
+            qt6-declarative-dev libgl1-mesa-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build --parallel "$(nproc)"
+
+      - name: Run Tests
+        run: ctest --test-dir build --output-on-failure
+
+  android:
+    runs-on: ubuntu-24.04
+    name: Android (arm64-v8a)
+    env:
+      QT_VERSION: 6.11.1
+      ANDROID_SDK_ROOT: /opt/android-sdk
+      ANDROID_NDK_ROOT: /opt/android-sdk/ndk/27.2.12479018
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt for Android
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: android_arm64_v8a
+          host: linux
+          target: android
+          dir: /opt/Qt
+          modules: qtmultimedia qtdeclarative qtshadertools
+
+      - name: Install Android SDK & NDK
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-path: ${{ env.ANDROID_SDK_ROOT }}
+          ndk-version: 27.2.12479018
+
+      - name: Configure for Android
+        run: |
+          cmake -B build-android \
+            -DCMAKE_TOOLCHAIN_FILE="${{ env.ANDROID_NDK_ROOT }}/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-24 \
+            -DCMAKE_FIND_ROOT_PATH="${{ env.QT_ROOT_DIR }}" \
+            -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT_DIR }}" \
+            -DQT_HOST_PATH="/opt/Qt/${{ env.QT_VERSION }}/gcc_64"
+
+      - name: Build for Android
+        run: cmake --build build-android --parallel "$(nproc)"
+
+      - name: Package APK
+        run: |
+          ${{ env.QT_ROOT_DIR }}/bin/androiddeployqt \
+            --input build-android/android-appmplayer-deployment-settings.json \
+            --output build-android/android-build \
+            --deployment bundled \
+            --gradle
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build-android/android-build/build/outputs/apk/debug/*.apk
+
+  web:
+    runs-on: ubuntu-24.04
+    name: Web (Wasm)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt for WebAssembly
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.8.3
+          target: wasm
+          host: linux
+          arch: wasm_singlethread
+          dir: /opt/Qt
+          modules: qtmultimedia qtdeclarative
+
+      - name: Configure for Wasm
+        run: |
+          cmake -B build-wasm \
+            -DCMAKE_TOOLCHAIN_FILE="${{ env.QT_ROOT_DIR }}/lib/cmake/Qt6/qt.toolchain.cmake" \
+            -DQT_HOST_PATH="/opt/Qt/6.8.3/gcc_64" \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build for WebAssembly
+        run: cmake --build build-wasm --parallel "$(nproc)"
+
+      - name: Upload Wasm Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-wasm
+          path: build-wasm/**/*.{wasm,html,js}
+
+  create-release:
+    needs: [desktop-linux, android, web]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Determine Release Info
+        id: release_info
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "name=Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          else
+            echo "tag=nightly-${{ github.run_number }}" >> $GITHUB_OUTPUT
+            echo "name=Nightly Build ${{ github.run_number }}" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          name: ${{ steps.release_info.outputs.name }}
+          prerelease: ${{ steps.release_info.outputs.prerelease }}
+          files: |
+            **/*.apk
+            **/*.wasm
+            **/*.html
+            **/*.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
