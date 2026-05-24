@@ -173,10 +173,12 @@ jobs:
             -DCMAKE_OSX_SYSROOT=iphoneos \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+            -DMPLAYER_BUILD_TESTS=OFF \
             -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for iOS Device
-        run: cmake --build build-ios-device --parallel "$(sysctl -n hw.logicalcpu)"
+        run: cmake --build build-ios-device --target appmplayer --parallel "$(sysctl -n hw.logicalcpu)"
 
       - name: Configure for iOS Simulator
         run: |
@@ -186,10 +188,12 @@ jobs:
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+            -DMPLAYER_BUILD_TESTS=OFF \
             -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for iOS Simulator
-        run: cmake --build build-ios-sim --parallel "$(sysctl -n hw.logicalcpu)"
+        run: cmake --build build-ios-sim --target appmplayer --parallel "$(sysctl -n hw.logicalcpu)"
 
   create-release:
     needs: [desktop-linux, android]

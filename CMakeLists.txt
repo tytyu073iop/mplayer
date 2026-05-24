@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 
 option(MPLAYER_BUILD_UI_TESTS "Build QML UI tests (tst_qml_*)" ON)
+option(MPLAYER_BUILD_TESTS "Build tests" ON)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS
     Quick
@@ -92,7 +93,7 @@ install(TARGETS appmplayer
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+if(MPLAYER_BUILD_TESTS AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
     enable_testing()
     add_subdirectory(tests)
 
