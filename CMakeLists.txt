@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 
+option(MPLAYER_BUILD_UI_TESTS "Build QML UI tests (tst_qml_*)" ON)
+
 find_package(Qt6 6.5 REQUIRED COMPONENTS
     Quick
     QuickControls2
@@ -91,14 +93,19 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-    add_dependencies(run_tests appmplayer
+    set(_run_tests_deps
         tst_audioengine
         tst_playlistmanager
         tst_filebrowser
         tst_database
-        tst_qml_controls
-        tst_qml_playlist
-        tst_qml_delegate
         tst_integration
     )
+    if(MPLAYER_BUILD_UI_TESTS)
+        list(APPEND _run_tests_deps
+            tst_qml_controls
+            tst_qml_playlist
+            tst_qml_delegate
+        )
+    endif()
+    add_dependencies(run_tests appmplayer ${_run_tests_deps})
 endif()

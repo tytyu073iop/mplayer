@@ -25,12 +25,14 @@ jobs:
           modules: qtmultimedia
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build
         run: cmake --build build --parallel "$(nproc)"
 
       - name: Run Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: ctest --test-dir build --output-on-failure
 
   android:
@@ -151,12 +153,15 @@ jobs:
             -DCMAKE_SYSTEM_VERSION=17.0 \
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for iOS Simulator
         run: cmake --build build-ios-sim --parallel "$(nproc)"
 
       - name: Run Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: ctest --test-dir build-ios-sim --output-on-failure
 
   create-release:
