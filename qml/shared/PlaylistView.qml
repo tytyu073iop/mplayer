@@ -13,6 +13,12 @@ ListView {
 
     model: null
 
+    Rectangle {
+        anchors.fill: parent
+        z: -1
+        color: "#121212"
+    }
+
     currentIndex: currentTrackIndex
 
     delegate: TrackDelegate {
@@ -45,7 +51,7 @@ ListView {
         anchors.centerIn: parent
         text: qsTr("No tracks found.\nOpen a folder to get started.")
         horizontalAlignment: Text.AlignHCenter
-        color: "#666"
+        color: "#888888"
         font.pixelSize: 14
         visible: root.count === 0
     }

@@ -10,6 +10,9 @@ ApplicationWindow {
 
     title: qsTr("Music Player")
     visible: true
+    color: "#121212"
+
+    Fusion.theme: Fusion.Dark
 
     minimumWidth: 800
     minimumHeight: 500
@@ -96,6 +99,10 @@ ApplicationWindow {
         ToolBar {
             Layout.fillWidth: true
             height: 48
+
+            background: Rectangle {
+                color: "#1a1a1a"
+            }
 
             RowLayout {
                 anchors.fill: parent

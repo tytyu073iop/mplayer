@@ -10,6 +10,10 @@ Page {
 
     property bool isPlayerExpanded: false
 
+    background: Rectangle {
+        color: "#121212"
+    }
+
     function openFolder() {
         folderDialog.open()
     }

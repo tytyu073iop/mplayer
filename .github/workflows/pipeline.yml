@@ -44,14 +44,14 @@ jobs:
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
       ANDROID_NDK_ROOT: ${{ github.workspace }}/android-sdk/ndk/27.2.12479018
-      ANDROID_API_LEVEL: 35
+      ANDROID_API_LEVEL: 36
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Android SDK & NDK
         uses: android-actions/setup-android@v3
         with:
-          packages: tools platform-tools platforms;android-35 build-tools;35.0.0 ndk;27.2.12479018
+          packages: tools platform-tools platforms;android-36 build-tools;36.0.0 ndk;27.2.12479018
 
       - name: Verify Android SDK
         run: |

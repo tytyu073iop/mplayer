@@ -20,6 +20,20 @@ ItemDelegate {
 
     highlighted: isCurrentlyPlaying
 
+    background: Rectangle {
+        implicitHeight: delegate.implicitHeight
+        width: delegate.width
+        color: {
+            if (delegate.pressed)
+                return "#333333"
+            if (delegate.hovered)
+                return "#282828"
+            if (delegate.highlighted)
+                return "#2a2a2a"
+            return "transparent"
+        }
+    }
+
     contentItem: RowLayout {
         spacing: 12
 
@@ -45,7 +59,7 @@ ItemDelegate {
             Text {
                 text: trackArtist || qsTr("Unknown Artist")
                 font.pixelSize: 12
-                color: "#999"
+                color: "#b3b3b3"
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -59,7 +73,7 @@ ItemDelegate {
                 return m + ":" + (s < 10 ? "0" : "") + s
             }
             font.pixelSize: 12
-            color: "#666"
+            color: "#808080"
         }
     }
 
