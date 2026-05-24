@@ -89,8 +89,15 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
     enable_testing()
     add_subdirectory(tests)
 
-    add_custom_target(run_tests ALL
-        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    if(MPLAYER_BUILD_UI_TESTS)
+        set(_ctest_command ${CMAKE_CTEST_COMMAND} --output-on-failure)
+    else()
+        set(_ctest_command
+            ${CMAKE_COMMAND} -E env QT_QPA_PLATFORM=offscreen
+            ${CMAKE_CTEST_COMMAND} --output-on-failure)
+    endif()
+    add_custom_target(run_tests
+        COMMAND ${_ctest_command}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
     set(_run_tests_deps

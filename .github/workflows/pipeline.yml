@@ -23,6 +23,7 @@ jobs:
           arch: linux_gcc_64
           dir: /opt/Qt
           modules: qtmultimedia
+          install-deps: true
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DMPLAYER_BUILD_UI_TESTS=OFF

@@ -14,6 +14,9 @@ function(add_qt_test name)
     qt_add_executable(${name} ${name}.cpp ${ARGN})
     target_link_libraries(${name} PRIVATE Qt6::Test Qt6::Quick Qt6::Multimedia Qt6::Sql)
     add_test(NAME ${name} COMMAND ${name})
+    if(NOT MPLAYER_BUILD_UI_TESTS)
+        set_tests_properties(${name} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    endif()
 endfunction()
 
 add_qt_test(tst_audioengine
