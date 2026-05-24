@@ -36,10 +36,7 @@ ListView {
 
         width: root.width
 
-        onClicked: {
-            root.currentIndex = actualIndex
-            root.trackSelected(actualIndex)
-        }
+        onClicked: root.trackSelected(actualIndex)
     }
 
     ScrollBar.vertical: ScrollBar {

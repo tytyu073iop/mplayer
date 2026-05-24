@@ -81,6 +81,7 @@ set_target_properties(appmplayer PROPERTIES
 if(ANDROID)
     set_target_properties(appmplayer PROPERTIES
         QT_ANDROID_MIN_SDK_VERSION 24
+        QT_ANDROID_COMPILE_SDK_VERSION 36
         QT_ANDROID_TARGET_SDK_VERSION 36
     )
 endif()

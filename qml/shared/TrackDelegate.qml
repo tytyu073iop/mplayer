@@ -77,5 +77,5 @@ ItemDelegate {
         }
     }
 
-    onClicked: delegate.ListView.view.currentIndex = actualIndex
+    onClicked: {} // handled by PlaylistView delegate
 }
