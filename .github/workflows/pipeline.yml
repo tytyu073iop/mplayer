@@ -47,7 +47,7 @@ jobs:
           host: linux
           target: android
           dir: /opt/Qt
-          modules: qtmultimedia qtdeclarative qtshadertools
+          modules: qtmultimedia
 
       - name: Install Android SDK & NDK
         uses: android-actions/setup-android@v3
@@ -114,8 +114,49 @@ jobs:
           name: web-wasm
           path: build-wasm/**/*.{wasm,html,js}
 
+  ios:
+    runs-on: macos-latest
+    name: iOS
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt for iOS
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.11.1
+          host: mac
+          target: ios
+          modules: qtmultimedia qtdeclarative
+
+      - name: Configure for iOS Device
+        run: |
+          cmake -B build-ios-device \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_SYSTEM_VERSION=17.0 \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build for iOS Device
+        run: cmake --build build-ios-device --parallel "$(nproc)"
+
+      - name: Configure for iOS Simulator
+        run: |
+          cmake -B build-ios-sim \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_SYSTEM_VERSION=17.0 \
+            -DCMAKE_OSX_SYSROOT=iphonesimulator \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build for iOS Simulator
+        run: cmake --build build-ios-sim --parallel "$(nproc)"
+
+      - name: Run Tests
+        run: ctest --test-dir build-ios-sim --output-on-failure
+
   create-release:
-    needs: [desktop-linux, android, web]
+    needs: [desktop-linux, android]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -145,8 +186,5 @@ jobs:
           prerelease: ${{ steps.release_info.outputs.prerelease }}
           files: |
             **/*.apk
-            **/*.wasm
-            **/*.html
-            **/*.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
