@@ -99,18 +99,20 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: 6.8.3
+          host: all_os
           target: wasm
-          host: linux
           arch: wasm_singlethread
           dir: /opt/Qt
           modules: qtmultimedia
+          install-deps: true
 
       - name: Configure for Wasm
         run: |
           cmake -B build-wasm \
             -DCMAKE_TOOLCHAIN_FILE="${{ env.QT_ROOT_DIR }}/lib/cmake/Qt6/qt.toolchain.cmake" \
-            -DQT_HOST_PATH="/opt/Qt/6.8.3/gcc_64" \
-            -DCMAKE_BUILD_TYPE=Release
+            -DQT_HOST_PATH="${{ env.QT_HOST_PATH }}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMPLAYER_BUILD_UI_TESTS=OFF
 
       - name: Build for WebAssembly
         run: cmake --build build-wasm --parallel "$(nproc)"
